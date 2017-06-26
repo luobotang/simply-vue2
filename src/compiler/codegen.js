@@ -91,9 +91,6 @@ function genOnce (el) {
             parent = parent.parent
         }
         if (!key) {
-            process.env.NODE_ENV !== 'production' && warn(
-                `v-once can only be used inside v-for that is keyed. `
-            )
             return genElement(el)
         }
         return `_o(${genElement(el)},${onceCount++}${key ? `,${key}` : ``})`
@@ -130,18 +127,6 @@ function genFor (el) {
     const alias = el.alias
     const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
     const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
-
-    if (
-        process.env.NODE_ENV !== 'production' &&
-        maybeComponent(el) && el.tag !== 'slot' && el.tag !== 'template' && !el.key
-    ) {
-        warn(
-            `<${el.tag} v-for="${alias} in ${exp}">: component lists rendered with ` +
-            `v-for should have explicit keys. ` +
-            `See https://vuejs.org/guide/list.html#key for more info.`,
-            true /* tip */
-        )
-    }
 
     el.forProcessed = true // avoid recursion
     return `_l((${exp}),` +
@@ -262,11 +247,6 @@ function genDirectives (el) {
 
 function genInlineTemplate (el) {
     const ast = el.children[0]
-    if (process.env.NODE_ENV !== 'production' && (
-        el.children.length > 1 || ast.type !== 1
-    )) {
-        warn('Inline-template components must have exactly one child element.')
-    }
     if (ast.type === 1) {
         const inlineRenderFns = generate(ast, currentOptions)
         return `inlineTemplate:{render:function(){${

@@ -14,6 +14,8 @@ import VNode, { createEmptyVNode } from './vdom/vnode'
 
 let uid = 0
 
+export let activeInstance = null
+
 export default class Vue {
     constructor(options) {
         this._init(options)
@@ -27,8 +29,11 @@ export default class Vue {
         initLifecycle(vm)
         initEvents(vm)
         initRender(vm)
-
         initState(vm)
+
+        if (vm.$options.el) {
+            vm.$mount(vm.$options.el)
+        }
     }
 
     // lifecycle
@@ -37,6 +42,8 @@ export default class Vue {
         const vm = this
         const prevEl = vm.$el
         const prevVnode = vm._vnode
+        const prevActiveInstance = activeInstance
+        activeInstance = vm
 
         vm._vnode = vnode
         if (!prevVnode) {
@@ -44,6 +51,7 @@ export default class Vue {
         } else {
             vm.$el = vm.__patch__(prevVnode, vnode)
         }
+        activeInstance = prevActiveInstance
 
         if (prevEl) {
             prevEl.__vue__ = null

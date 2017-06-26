@@ -8,7 +8,8 @@ import {
     pluckModuleFunction,
     addProp,
     addAttr,
-    addHandler
+    addHandler,
+    addDirective
 } from './helpers'
 
 let decoder
@@ -126,20 +127,7 @@ export function parse (template, options) {
             }
 
             function checkRootConstraints (el) {
-                if (process.env.NODE_ENV !== 'production') {
-                    if (el.tag === 'slot' || el.tag === 'template') {
-                        warnOnce(
-                            `Cannot use <${el.tag}> as component root element because it may ` +
-                            'contain multiple nodes.'
-                        )
-                    }
-                    if (el.attrsMap.hasOwnProperty('v-for')) {
-                        warnOnce(
-                            'Cannot use v-for on stateful component root element because ' +
-                            'it renders multiple elements.'
-                        )
-                    }
-                }
+                // ...
             }
 
             // tree management
@@ -452,31 +440,9 @@ function processAttrs(el) {
                     name = name.slice(0, -(arg.length + 1))
                 }
                 addDirective(el, name, rawName, value, arg, modifiers)
-                if (process.env.NODE_ENV !== 'production' && name === 'model') {
-                    checkForAliasModel(el, value)
-                }
             }
         } else {
-            // literal attribute
-            if (process.env.NODE_ENV !== 'production') {
-                const expression = parseText(value, delimiters)
-                if (expression) {
-                    warn(
-                        `${name}="${value}": ` +
-                        'Interpolation inside attributes has been removed. ' +
-                        'Use v-bind or the colon shorthand instead. For example, ' +
-                        'instead of <div id="{{ val }}">, use <div :id="val">.'
-                    )
-                }
-            }
             addAttr(el, name, JSON.stringify(value))
         }
-    }
-}
-
-function checkForAliasModel (el) {
-    let _el = el
-    while (_el) {
-        _el = _el.parent
     }
 }

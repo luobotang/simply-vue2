@@ -13,6 +13,7 @@ import {
 import { createCompiler } from './compiler/index'
 import directives from './directives'
 import modules from './modules'
+import { patch } from './patch'
 
 const isUnaryTag = makeMap(
     'area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
@@ -44,6 +45,8 @@ const idToTemplate = id => {
 }
 
 const shouldDecodeNewlines = shouldDecode('\n', '&#10;')
+
+Vue.prototype.__patch__ = patch
 
 const mount = Vue.prototype.$mount
 Vue.prototype.$mount = function (el, hydrating) {
