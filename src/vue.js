@@ -7,10 +7,14 @@ import {
     bind,
     noop,
     isPlainObject,
-    query
+    query,
+    emptyObject,
+    toNumber,
+    toString
 } from './util'
 import { createElement } from './vdom/create-element'
-import VNode, { createEmptyVNode } from './vdom/vnode'
+import VNode, { createEmptyVNode, cloneVNodes, createTextVNode } from './vdom/vnode'
+import { renderList, renderSlot, resolveFilter, renderStatic, markOnce } from './render-helpers'
 
 let uid = 0
 
@@ -116,13 +120,59 @@ export default class Vue {
 
     _render() {
         const vm = this
-        let vnode = vm._vnode
+        const {
+            render,
+            staticRenderFns,
+            _parentVnode
+        } = vm.$options
+
+        if (vm._isMounted) {
+            // clone slot nodes on re-renders
+            for (const key in vm.$slots) {
+                vm.$slots[key] = cloneVNodes(vm.$slots[key])
+            }
+        }
+
+        vm.$scopedSlots = (_parentVnode && _parentVnode.data.scopedSlots) || emptyObject
+
+        if (staticRenderFns && !vm._staticTrees) {
+            vm._staticTrees = []
+        }
+        // set parent vnode. this allows render functions to have access
+        // to the data on the placeholder node.
+        vm.$vnode = _parentVnode
+        // render self
+        let vnode
+        try {
+            vnode = render.call(vm /* vm._renderProxy */, vm.$createElement)
+        } catch (e) {
+            console.error(e)
+            vnode = vm._vnode
+        }
+        // return empty vnode in case the render function errored out
         if (!(vnode instanceof VNode)) {
             vnode = createEmptyVNode()
         }
+        // set parent
+        vnode.parent = _parentVnode
         return vnode
     }
 }
+
+// Vue.prototype._o = markOnce
+Vue.prototype._n = toNumber
+Vue.prototype._s = toString
+Vue.prototype._l = renderList
+Vue.prototype._t = renderSlot
+// Vue.prototype._q = looseEqual
+// Vue.prototype._i = looseIndexOf
+Vue.prototype._m = renderStatic
+Vue.prototype._f = resolveFilter
+// Vue.prototype._k = checkKeyCodes
+// Vue.prototype._b = bindObjectProps
+Vue.prototype._v = createTextVNode
+Vue.prototype._e = createEmptyVNode
+// Vue.prototype._u = resolveScopedSlots
 
 function initLifecycle(vm) {
     vm.$root = vm
@@ -182,6 +232,7 @@ function getData (data, vm) {
     try {
         return data.call(vm)
     } catch (e) {
+        console.log(e)
         return {}
     }
 }

@@ -65,7 +65,7 @@ export default class Watcher {
             try {
                 value = this.getter.call(vm, vm)
             } catch (e) {
-                // ...
+                console.log(e)
             }
         } else {
             value = this.getter.call(vm, vm)
@@ -141,7 +141,7 @@ export default class Watcher {
                     try {
                         this.cb.call(this.vm, value, oldValue)
                     } catch (e) {
-                        // ...
+                        console.log(e)
                     }
                 } else {
                     this.cb.call(this.vm, value, oldValue)

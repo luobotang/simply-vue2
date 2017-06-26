@@ -1,3 +1,18 @@
+export function toString (val) {
+    return val == null
+        ? ''
+        : typeof val === 'object'
+            ? JSON.stringify(val, null, 2)
+            : String(val)
+}
+
+export function toNumber (val) {
+    const n = parseFloat(val)
+    return isNaN(n) ? val : n
+}
+
+export const emptyObject = Object.freeze({})
+
 export function isUndef (v) {
     return v === undefined || v === null
 }
@@ -114,6 +129,8 @@ export function bind (fn, ctx) {
 export function noop () {}
 
 export const no = () => false
+
+export const identity = (_) => _
 
 export const hasProto = '__proto__' in {}
 
